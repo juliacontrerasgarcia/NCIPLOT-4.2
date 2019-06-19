@@ -48,7 +48,7 @@ NCIplot requires the NCIPLOT_HOME environment variable to find the
 atomic density files contained in the dat/ subdirectory. Set it to the
 absolute path to NCIplot:
 
-export NCIPLOT_HOME=/home/xxxx/src_nciplot_4.0/
+export NCIPLOT_HOME=/home/xxxx/nciplot/
 
 You may add the previous line to your .bashrc or .bash_aliases file for
 convenience.
