@@ -1,0 +1,16 @@
+Version 3.2.7.6.2
+
+! Integration algorithm modified. We made the comparation
+! at the final curves
+!
+! This is NCIPLOT Ver. 3.2 Rev 7 Sub 6.1
+! Simplified version without ELF,Laplacian, kinetic energy and energy densities
+! and IGM.
+! Computation of NCI volumns and charges with several references
+! xyz, wfn available.
+! C.Quan Multigrid implementation  
+! Integration keyworkd suppresed.
+! Line 1476 
+! A cube is selected only if rho and redgrad values at its vertexes are within rho and redgrad ranges. 
+! C.Quan original code rejected a cube only if rho and redgrad values at the vertexes are  outside 
+! rho and redgrad ranges. 
