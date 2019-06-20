@@ -4,6 +4,7 @@ Version 4.0
 Adaptive grid refinement included.
 Integration algorithms included.
 Integration by subdomains of sign(lambda2)*rho implemented.
+Addition of the .wfx reader module by Dave Arias.
 
 
 
