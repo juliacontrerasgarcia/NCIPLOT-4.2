@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-! props: Computing electron density, its derivative and DFT functional Computing electron density, its derivative and DFT functionalss 
+! props: Computing electron density, its derivative and DFT functional 
 
 module props
   use reader, only: grid1
