@@ -254,7 +254,7 @@ program nciplot
    ! - CUTOFFS
    ! - CUTPLOT
    ! - ISORDG
-   ! - RHOCUT2
+   ! - INTERCUT
    ! - DGRID
    ! - RANGE
    ! - CG2FG
