@@ -26,3 +26,4 @@ else
   FCFLAGS = -O -fopenmp
   LDFLAGS = -fopenmp
 endif
+
