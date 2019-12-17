@@ -4,7 +4,7 @@
 ! Weitao Yang <weitao.yang@duke.edu>,
 ! Roberto A. Boto <robalboto@gmail.com>,
 ! Chaoyou Quan  <quanchaoyu@gmail.com>
-! Rubén Laplaza <rlaplaza@lct.jussieu.fr>
+! R. Laplaza <rlaplaza@lct.jussieu.fr>
 !
 ! nciplot is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
