@@ -195,13 +195,12 @@ program nciplot
    ! Input files read and processed. Set defaults for running NCIPLOT now.
    !===============================================================================!
    rhocut = 0.5d0 ! density cutoff
+   dimcut = 1.0d0  ! RDG cutoff
    xinc = 0.1d0/bohrtoa   ! grid step
    if (any(m(:)%ifile == ifile_wfn) .or. any(m(:)%ifile == ifile_wfx)) then
-      dimcut = 1.0d0  ! RDG cutoff
       isordg = 0.5d0  ! RDG isosurface
       rhoplot = 0.05d0 ! Density isosurface
    else
-      dimcut = 1.0d0  ! RDG cutoff
       isordg = 0.3d0  ! RDG isosurface
       rhoplot = 0.07d0 ! Density isosurface
    end if
@@ -254,11 +253,14 @@ program nciplot
    ! - CUTOFFS
    ! - CUTPLOT
    ! - ISORDG
-   ! - RHOCUT2
+   ! - INTERCUT
    ! - DGRID
    ! - RANGE
    ! - CG2FG
    ! - INTEGRATE
+   ! - FINE
+   ! - ULTRAFINE
+   ! - COARSE
    !===============================================================================!
    do while (.true.)
       read (uin, '(a)', end=11) line
@@ -275,12 +277,14 @@ program nciplot
 
       case ("RTHRES")       ! extra box limits
          read (line, *) rthres
+         rthres = max(rthres, 1d-3)
          rthres = rthres/bohrtoa ! change to bohr
 
       case ("LIGAND")
          ligand = .true.              ! ligand option
          inter = .true.               ! intermolecular option automatically on
          read (line, *) udat0, rthres ! system in (udat0) as center
+         rthres = max(rthres, 1d-3)
          rthres = rthres/bohrtoa      ! change to bohr
 
       case ("INTERMOLECULAR")
@@ -289,6 +293,7 @@ program nciplot
       case ("RADIUS")
          autor = .false.
          read (line, *) x, rdum      ! center of the box
+         rdum = max(rdum, 1d-3)
          xinit = (x - rdum)/bohrtoa  ! box limits
          xmax = (x + rdum)/bohrtoa
 
@@ -300,7 +305,7 @@ program nciplot
       case ("OUTPUT")
          read (line, *) noutput          ! number of output files
 
-      case ("CUBE")         ! defining cube limits from coordinates. Example:
+      case ("CUBE")         ! defining cube limits from coordinates in angstroms. Example:
          autor = .false.    !CUBE x0,y0,z0,x1,y1,z1 format
          read (line, *) xinit, xmax
 
@@ -394,6 +399,35 @@ program nciplot
          xinc = max(xinc, 1d-4)
          xinc = xinc/bohrtoa ! transforming to angstrom to bohr
 
+      case ("FINE")          ! FINE defaults
+         xinc = 0.05d0/bohrtoa   ! grid step
+         if (allocated(fginc)) then
+            deallocate (fginc)
+         end if
+         ng = 3
+         allocate (fginc(ng))
+         fginc = (/4, 2, 1/)
+
+      case ("ULTRAFINE")          ! ULTRAFINE defaults
+         xinc = 0.025d0/bohrtoa   ! grid step
+         if (allocated(fginc)) then
+            deallocate (fginc)
+         end if
+         ng = 3
+         allocate (fginc(ng))
+         fginc = (/3, 2, 1/)
+
+      case ("COARSE")          ! COARSE defaults
+         xinc = 0.15d0/bohrtoa   ! grid step
+         if (allocated(fginc)) then
+            deallocate (fginc)
+         end if
+         allocate (fginc(4))
+         fginc = (/8, 4, 2, 1/)
+         if (.not. inter) then
+            rthres = 0.5d0     ! box limits around the molecule
+         end if
+
       case ("CUTOFFS")          ! density and RDG cutoffs
          read (line, *) rhocut, dimcut
 
@@ -403,7 +437,7 @@ program nciplot
       case ("ISORDG")           !RDG isosurface used in the RDG script
          read (line, *) isordg
 
-      case ("RHOCUT2")          ! cutoffs for intermolecularity definition
+      case ("INTERCUT")          ! cutoffs for intermolecularity definition
          read (line, *) rhoparam, rhoparam2
 
       case ("DGRID")            ! using grids for promolecular densities
@@ -420,6 +454,7 @@ program nciplot
          read (line(:), *) ng, fginc ! CG2FG 4 8 4 2 1
 
       case ("RANGE")  ! range integration
+         dointeg = .true.              ! integration is required as well to apply the s=dimcut cutoff
          read (line, *) nranges ! number of ranges
          if (nranges .le. 0) then
             call error('nciplot', 'No ranges were given', faterr)
@@ -438,7 +473,7 @@ program nciplot
          endif
 
       case ("INTEGRATE")  ! integration
-         dointeg = .true.              ! intermolecular option
+         dointeg = .true.              ! integrate
 
       case default ! something else is read
          call error('nciplot', 'Don''t know what to do with '//trim(word)//' keyword', faterr)
@@ -483,7 +518,7 @@ program nciplot
    write (uout, 110) 'RHO  THRESHOLD   (au):', rhocut
    write (uout, 110) 'RDG  THRESHOLD   (au):', dimcut
    if (inter) write (uout, 110) 'DISCARDING RHO PARAM :', rhoparam
-   if (ligand) write (uout, 110) 'RADIAL THRESHOLD  (A):', rthres
+   if (ligand) write (uout, 110) 'RADIAL THRESHOLD  (A):', rthres*bohrtoa
    write (uout, *)
 !  write(uout,121) xinit, xmax, xinc, nstep ! this is currently not used because it will be adapted
    if (noutput >= 2) then    ! number of outputs --> 2: Only .CUBE files
@@ -625,7 +660,7 @@ program nciplot
       end do  ! k=0,nstep(3)-1
       !$omp end parallel do
       call system_clock(count=c2)
-      write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=4), ' secs'
+      write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
 
    else  ! wavefunction densities
       call system_clock(count=c1)
@@ -877,7 +912,7 @@ program nciplot
                      l1 = (/l, l + 1/)
                      j1 = (/j, j + 1/)
                      k1 = (/k, k + 1/)
-                     flag_range = (((crho(l1, j1, k1)/100d0) .lt. lowerbound) .or. ((crho(l1, j1, k1)/100d0) .gt. upperbound))
+                     flag_range = (((crho(l1, j1, k1)/100d0) .le. lowerbound) .or. ((crho(l1, j1, k1)/100d0) .ge. upperbound))
 
                      if (count(flag_range) .eq. 0) then
                         tmp_rmbox(l, j, k) = .false.
