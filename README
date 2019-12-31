@@ -60,5 +60,34 @@ environment variable to the number of cores:
 export OMP_NUM_THREADS=4
 
 Several tests and examples are provided in the tests/
-directory. The PDF manual can be found in doc/.
+directory. The PDF manual will be available in doc/ directory soon.
+
+As a brief outline, the accepted keywords in this version are:
+   !===============================================================================!
+   ! Read optional keywords.
+   ! Accepted keywords in this version:
+   ! - RTHRES
+   ! - LIGAND
+   ! - RADIUS
+   ! - INTERMOLECULAR
+   ! - ONAME
+   ! - INCREMENTS
+   ! - OUTPUT
+   ! - CUBE
+   ! - ATCUBE
+   ! - FRAGMENT
+   ! - CUTOFFS
+   ! - CUTPLOT
+   ! - ISORDG
+   ! - INTERCUT
+   ! - DGRID
+   ! - RANGE
+   ! - CG2FG
+   ! - INTEGRATE
+   ! - FINE
+   ! - ULTRAFINE
+   ! - COARSE
+   !===============================================================================!
+
+Have fun!
 
