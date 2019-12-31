@@ -406,7 +406,7 @@ program nciplot
          end if
          ng = 3
          allocate (fginc(ng))
-         fginc = (/4, 2, 1/)
+         fginc = (/12, 6, 3, 1/)
 
       case ("ULTRAFINE")          ! ULTRAFINE defaults
          xinc = 0.025d0/bohrtoa   ! grid step
@@ -415,7 +415,7 @@ program nciplot
          end if
          ng = 3
          allocate (fginc(ng))
-         fginc = (/3, 2, 1/)
+         fginc = (/20, 10, 5, 1/)
 
       case ("COARSE")          ! COARSE defaults
          xinc = 0.15d0/bohrtoa   ! grid step
@@ -556,7 +556,7 @@ program nciplot
    !===============================================================================!
    ! Start run, using multi-level grids.
    !===============================================================================!
-   ind_g = 1  ! index of the multi-level grids
+   ind_g = 1  ! index of the multi-level grids, starts at 1 always
    xinc_init = xinc ! initial coarse grid
    allocate (rho_n(1:nfiles))
 
@@ -579,6 +579,8 @@ program nciplot
       if (istat /= 0) call error('nciplot', 'could not allocate memory for density cube', faterr)
       allocate (cgrad(0:nstep(1) - 1, 0:nstep(2) - 1, 0:nstep(3) - 1), stat=istat)
       if (istat /= 0) call error('nciplot', 'could not allocate memory for grad', faterr)
+      xinc_coarse = xinc ! initialize just in case
+      nstep_coarse = nstep ! initialize just in case
    end if
 
    !===============================================================================!
@@ -725,19 +727,20 @@ program nciplot
       endif !interatomic run
       call system_clock(count=c2)
       write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
-   endif !ispromol
+   endif !iswfn
+
    if ((ind_g .le. ng) .or. (ng .eq. 1)) then
       xinc_coarse = xinc ! record increments of the previous coarse grid
       nstep_coarse = nstep
       firstgrid = .false.
       if (allocated(rmbox_coarse)) then
          deallocate (rmbox_coarse)
-         allocate (tmp_rmbox(0:nstep(1) - 2, 0:nstep(2) - 2, 0:nstep(3) - 2), stat=istat)
+         allocate (tmp_rmbox(0:nstep_coarse(1) - 2, 0:nstep_coarse(2) - 2, 0:nstep_coarse(3) - 2), stat=istat)
          if (istat /= 0) call error('nciplot', 'could not allocate memory for tmp_rmbox', faterr)
          call build_rmbox_coarse(rhocut, dimcut, ng, ind_g, fginc, tmp_rmbox, crho, cgrad, nstep_coarse)
          call move_alloc(tmp_rmbox, rmbox_coarse)
       else
-         allocate (rmbox_coarse(0:nstep(1) - 2, 0:nstep(2) - 2, 0:nstep(3) - 2), stat=istat)
+         allocate (rmbox_coarse(0:nstep_coarse(1) - 2, 0:nstep_coarse(2) - 2, 0:nstep_coarse(3) - 2), stat=istat)
          if (istat /= 0) call error('nciplot', 'could not allocate memory for rmbox_coarse', faterr)
          call build_rmbox_coarse(rhocut, dimcut, ng, ind_g, fginc, rmbox_coarse, crho, cgrad, nstep_coarse)
       end if
@@ -745,6 +748,10 @@ program nciplot
          deallocate (tmp_rmbox)
       end if
    end if
+
+! debugging
+   !write(*,*) nstep_coarse(1) - 2, nstep_coarse(2) - 2, nstep_coarse(3) - 2
+   !write(*,*) shape(rmbox_coarse)
 
 ! loop over multi-level grids
    ind_g = ind_g + 1
@@ -765,7 +772,7 @@ program nciplot
          lumesh = -1
          lusol = -1
       endif
-      if (noutput .eq. 3) then
+      if (noutput .eq. 4) then
          open (lumesh, file=trim(oname)//".mesh")
          open (lusol, file=trim(oname)//".sol")
          call write_mesh_file(lumesh, lusol, xinit, xinc, nstep, cgrad, xinc_coarse, rmbox_coarse, &
@@ -773,6 +780,9 @@ program nciplot
          close (lumesh)
          close (lusol)
       endif
+      if (allocated(vert_use)) then
+         deallocate (vert_use)
+      end if
    end if
 
    !===============================================================================!
