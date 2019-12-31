@@ -23,9 +23,10 @@ eigenvalue, times the density, is able to characterize both the strength and (un
 nature of the interactions and defines the isosurface colouring. 
 See the reference below for a thorough explanation of the details.
 
-This program reads a gaussian-style wfn or wfx file or a geometry xyz file and
+This program reads a gaussian-style wfn or wfx file, or a geometry xyz file, and
 computes density and reduced density gradient (RDG) on a grid. It can provide 
-cube-format cube files and VMD scripts for the direct visualization of the results.  
+cube-format cube files and VMD scripts for the direct visualization of the results. 
+It can also integrate the electron density in subdomains of RDG. 
 
 * Compilation
 
@@ -61,4 +62,7 @@ export OMP_NUM_THREADS=4
 
 Several tests and examples are provided in the test-cases/
 directory. The PDF manual can be found in doc/.
+
+Have fun!
+
 
