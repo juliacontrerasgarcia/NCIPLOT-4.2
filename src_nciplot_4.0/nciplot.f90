@@ -404,18 +404,18 @@ program nciplot
          if (allocated(fginc)) then
             deallocate (fginc)
          end if
-         ng = 3
+         ng = 4
          allocate (fginc(ng))
-         fginc = (/12, 6, 3, 1/)
+         fginc = (/12, 8, 4, 1/)
 
       case ("ULTRAFINE")          ! ULTRAFINE defaults
          xinc = 0.025d0/bohrtoa   ! grid step
          if (allocated(fginc)) then
             deallocate (fginc)
          end if
-         ng = 3
+         ng = 4
          allocate (fginc(ng))
-         fginc = (/20, 10, 5, 1/)
+         fginc = (/24, 16, 8, 1/)
 
       case ("COARSE")          ! COARSE defaults
          xinc = 0.15d0/bohrtoa   ! grid step
@@ -601,6 +601,22 @@ program nciplot
       call move_alloc(tmp_cgrad, cgrad)
    end if
 
+   !===============================================================================!
+   ! Sanity check.
+   !===============================================================================!
+   if (.not. firstgrid) then
+      do i = 1, 3
+         if (ubound(rmbox_coarse, i) .ne. (nstep_coarse(i) - 2)) then
+            write (*, *) ubound(rmbox_coarse, i)
+            write (*, *) nstep_coarse(i) - 2
+            call error('nciplot', 'allocations did not work for adaptive grids', faterr)
+         end if
+      end do
+   end if
+
+   !===============================================================================!
+   ! Run adaptive grids.
+   !===============================================================================!
    if (ispromol) then    ! promolecular densities
       call system_clock(count=c1)
       !$omp parallel do private (x,rho,grad,hess,heigs,hvecs,wk1,wk2,istat,grad2,&
@@ -618,7 +634,6 @@ program nciplot
                            indx = floor(((/i0, j0, k0/)*xinc)/xinc_coarse)
                            indx = (/min(nstep_coarse(1) - 2, indx(1)), min(nstep_coarse(2) - 2, indx(2)), &
                                     min(nstep_coarse(3) - 2, indx(3))/)
-
                            if ((.not. flag) .and. (.not. (rmbox_coarse(indx(1), indx(2), indx(3))))) then
                               flag = .true.
                               goto 20
@@ -668,7 +683,7 @@ program nciplot
       call system_clock(count=c1)
       call calcprops_wfn(xinit, xinc, nstep, m, nfiles, crho, cgrad, cheig)
       !$omp parallel do private (x,rho,grad,hess,heigs,hvecs,wk1,wk2,istat,grad2,&
-      !$omp dimgrad,intra,rhom) schedule(dynamic)
+      !$omp dimgrad,intra,rhom,flag,indx,i0,j0,k0) schedule(dynamic)
       do k = 0, nstep(3) - 1
          do j = 0, nstep(2) - 1
             do i = 0, nstep(1) - 1
