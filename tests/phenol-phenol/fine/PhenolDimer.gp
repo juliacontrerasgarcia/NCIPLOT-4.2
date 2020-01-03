@@ -3,7 +3,7 @@ set terminal pngcairo size 1000,1000 enhanced font 'Helvetica,20'
 set encoding iso_8859_1
 set output 'PhenolDimer_2d.png'
 set key
-set ylabel 's(a.u)' font "Helvetica, 30"
+set ylabel 's(a.u.)' font "Helvetica, 30"
 set xlabel 'sign({/Symbol l}_2){/Symbol r}(a.u.)' font "Helvetica, 30"
 set pm3d map
 # Define a color gradient palette used by pm3d

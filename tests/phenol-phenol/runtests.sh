@@ -12,7 +12,7 @@ for dir in ./*/ ; do
    echo "Results from intramolecular integration in "${dir}" : "${int_n1}
    cd ..
 done
-
 rm -rf */*.dat
 rm -rf */*.cube
 rm -rf */*.nco
+rm -rf */*.vmd

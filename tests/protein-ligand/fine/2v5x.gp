@@ -1,7 +1,7 @@
 # Gnuplot script for mapping NCI color code over NCI diagrams, by R.A.Boto
 set terminal pngcairo size 1000,1000 enhanced font 'Helvetica,20'
 set encoding iso_8859_1
-set output 'PhenolDimer_2d.png'
+set output '2v5x_2d.png'
 set key
 set ylabel 's(a.u.)' font "Helvetica, 30"
 set xlabel 'sign({/Symbol l}_2){/Symbol r}(a.u.)' font "Helvetica, 30"
@@ -20,5 +20,5 @@ set xrange [-0.06:0.06]
 set yrange [0.0:1.0]
 # set the range of values which are colored using the current palette
 set cbrange [-0.06:0.06]
-plot 'PhenolDimer.dat' u 1:2:1 w p lw 6 palette t ''
+plot '2v5x.dat' u 1:2:1 w p lw 6 palette t ''
 
