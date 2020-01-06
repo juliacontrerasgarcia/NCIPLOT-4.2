@@ -248,6 +248,212 @@ contains
 
    end subroutine calcprops_wfn
 
+   subroutine calcprops_id_wfn(xinit, xinc, n, mol, nmol, molid, rho, grad, cheig)
+      use reader
+      use tools_io
+      use tools_math
+      use param
+
+      real*8, intent(in) :: xinit(3), xinc(3)
+      integer, intent(in) :: n(3), nmol, molid
+      type(molecule) :: mol(nmol)
+      real*8, dimension(n(1), n(2), n(3)), intent(out) :: rho, grad
+      real*8, dimension(n(1), n(2), n(3)), intent(out) :: cheig
+      real*8, allocatable, dimension(:, :) :: dx, dy, dz, d2, gg
+      real*8, allocatable, dimension(:) :: tp, maxc, rhoaux
+      integer :: nmcent, istat
+      real*8, allocatable :: chi(:, :), phi(:, :), hess(:, :, :)
+      logical, allocatable :: ldopri(:, :)
+
+      integer :: i, j, k, m, iat, ip, jp, kp, nn, l(3)
+      integer :: ityp, ipri, ipria, ix, imo
+      real*8 :: ex, xl2, xl(3, 0:2), x0(3), al
+      real*8 :: wk1(3), wk2(3), hvecs(3, 3), grad2, heigs(3)
+      real*8 :: rho53, ebose, df
+
+      real*8, parameter :: cutoff_pri = 1d-10
+      real*8, parameter :: fothirds = 4d0/3d0
+      real*8, parameter :: m53 = -5d0/3d0
+
+      rho = 0d0
+      grad = 0d0
+      cheig = 0d0
+      m = molid
+      nmcent = max(nmcent, mol(m)%n)
+
+      allocate (dx(n(1), nmcent), dy(n(1), nmcent), dz(n(1), nmcent), d2(n(1), nmcent), stat=istat)
+      if (istat /= 0) call error('calcprops', 'error allocating distance matrix', faterr)
+      allocate (hess(n(1), 3, 3), stat=istat)
+      if (istat /= 0) call error('calcprops', 'error allocating hessian', faterr)
+      allocate (tp(n(1)), rhoaux(n(1)), stat=istat)
+      if (istat /= 0) call error('calcprops', 'error allocating rhoaux', faterr)
+      allocate (gg(n(1), 3), stat=istat)
+      if (istat /= 0) call error('calcprops', 'error allocating gg', faterr)
+
+      hess = 0d0
+      rhoaux = 0d0
+      tp = 0d0
+      gg = 0d0
+
+      ! run over y and z
+      !$omp parallel do private (ip,jp,kp,hess,tp,gg,chi,phi,maxc,ldopri,dx,dy,dz,d2,&
+      !$omp nn,ipri,iat,al,ex,x0,l,xl,xl2,grad2,rho53,ebose,df,hvecs,wk1,wk2,&
+      !$omp istat,rhoaux) schedule(dynamic)
+
+      do j = 0, n(2) - 1
+         jp = j + 1
+         do k = 0, n(3) - 1
+            kp = k + 1
+            ! zero in-line hessian and tp
+            hess = 0d0
+            rhoaux = 0d0
+            tp = 0d0
+            gg = 0d0
+
+            ! allocate primitive evaluation array
+            allocate (chi(mol(m)%npri, 10), phi(mol(m)%nmo, 10))
+
+            ! identify the max coefficient
+            allocate (maxc(mol(m)%npri), ldopri(mol(m)%npri, 10))
+            maxc = 0d0
+            do imo = 1, mol(m)%nmo
+               do ipri = 1, mol(m)%npri
+                  maxc(ipri) = max(maxc(ipri), abs(mol(m)%c(imo, ipri)))
+               enddo
+            enddo
+
+            ! calculate distances
+
+            do iat = 1, mol(m)%n
+               do i = 0, n(1) - 1
+                  ip = i + 1
+                  dx(ip, iat) = xinit(1) + i*xinc(1) - mol(m)%x(1, iat)
+                  dy(ip, iat) = xinit(2) + j*xinc(2) - mol(m)%x(2, iat)
+                  dz(ip, iat) = xinit(3) + k*xinc(3) - mol(m)%x(3, iat)
+                  d2(ip, iat) = dx(ip, iat)*dx(ip, iat) + dy(ip, iat)*dy(ip, iat) + dz(ip, iat)*dz(ip, iat)
+               enddo
+            enddo
+
+            ! calculate primitives at the points
+            do i = 0, n(1) - 1
+               ip = i + 1
+               nn = 0
+               do ityp = 1, mol(m)%maxntyp
+                  do ipria = nn + 1, nn + mol(m)%ntyp(ityp)
+                     ipri = mol(m)%intyp(ipria)
+                     iat = mol(m)%icenter(ipri)
+                     al = mol(m)%e(ipri)
+                     ex = exp(-al*d2(ip, iat))
+
+                     x0 = (/dx(ip, iat), dy(ip, iat), dz(ip, iat)/)
+
+                     call index0(ityp, l)
+                     do ix = 1, 3
+                        if (l(ix) == 0) then
+                           xl(ix, 0) = 1d0
+                           xl(ix, 1) = 0d0
+                           xl(ix, 2) = 0d0
+                        else if (l(ix) == 1) then
+                           xl(ix, 0) = x0(ix)
+                           xl(ix, 1) = 1d0
+                           xl(ix, 2) = 0d0
+                        else if (l(ix) == 2) then
+                           xl(ix, 0) = x0(ix)*x0(ix)
+                           xl(ix, 1) = 2d0*x0(ix)
+                           xl(ix, 2) = 2d0
+                        else if (l(ix) == 3) then
+                           xl(ix, 0) = x0(ix)*x0(ix)*x0(ix)
+                           xl(ix, 1) = 3d0*x0(ix)*x0(ix)
+                           xl(ix, 2) = 6d0*x0(ix)
+                        else if (l(ix) == 4) then
+                           xl2 = x0(ix)*x0(ix)
+                           xl(ix, 0) = xl2*xl2
+                           xl(ix, 1) = 4d0*xl2*x0(ix)
+                           xl(ix, 2) = 12d0*xl2
+                        else
+                           call error('pri012', 'power of L not supported', faterr)
+                        end if
+                     end do
+
+                     chi(ipri, 1) = xl(1, 0)*xl(2, 0)*xl(3, 0)*ex
+                     chi(ipri, 2) = (xl(1, 1) - 2*al*x0(1)**(l(1) + 1))*xl(2, 0)*xl(3, 0)*ex
+                     chi(ipri, 3) = (xl(2, 1) - 2*al*x0(2)**(l(2) + 1))*xl(1, 0)*xl(3, 0)*ex
+                     chi(ipri, 4) = (xl(3, 1) - 2*al*x0(3)**(l(3) + 1))*xl(1, 0)*xl(2, 0)*ex
+                     chi(ipri, 5) = (xl(1, 2) - 2*al*(2*l(1) + 1)*xl(1, 0) &
+                                     + 4*al*al*x0(1)**(l(1) + 2))*xl(2, 0)*xl(3, 0)*ex
+                     chi(ipri, 6) = (xl(2, 2) - 2*al*(2*l(2) + 1)*xl(2, 0) &
+                                     + 4*al*al*x0(2)**(l(2) + 2))*xl(3, 0)*xl(1, 0)*ex
+                     chi(ipri, 7) = (xl(3, 2) - 2*al*(2*l(3) + 1)*xl(3, 0) &
+                                     + 4*al*al*x0(3)**(l(3) + 2))*xl(1, 0)*xl(2, 0)*ex
+                     chi(ipri, 8) = (xl(1, 1) - 2*al*x0(1)**(l(1) + 1))* &
+                                    (xl(2, 1) - 2*al*x0(2)**(l(2) + 1))*xl(3, 0)*ex
+                     chi(ipri, 9) = (xl(1, 1) - 2*al*x0(1)**(l(1) + 1))* &
+                                    (xl(3, 1) - 2*al*x0(3)**(l(3) + 1))*xl(2, 0)*ex
+                     chi(ipri, 10) = (xl(3, 1) - 2*al*x0(3)**(l(3) + 1))* &
+                                     (xl(2, 1) - 2*al*x0(2)**(l(2) + 1))*xl(1, 0)*ex
+
+                     do ix = 1, 10
+                        ldopri(ipri, ix) = (abs(chi(ipri, ix))*maxc(ipri) > cutoff_pri)
+                     enddo
+                  enddo ! ipria = nn+1, nn+ntyp
+
+                  nn = nn + mol(m)%ntyp(ityp)
+               enddo ! ityp = 1, maxntyp
+
+               ! build the MO values at the point
+               phi = 0d0
+               do ix = 1, 10
+                  do ipri = 1, mol(m)%npri
+                     if (.not. ldopri(ipri, ix)) cycle
+                     do imo = 1, mol(m)%nmo
+                        phi(imo, ix) = phi(imo, ix) + mol(m)%c(imo, ipri)*chi(ipri, ix)
+                     enddo
+                  enddo
+               enddo
+
+               ! contribution to the density, etc.
+               do imo = 1, mol(m)%nmo
+                  rhoaux(ip) = rhoaux(ip) + mol(m)%occ(imo)*phi(imo, 1)*phi(imo, 1)
+                  gg(ip, 1) = gg(ip, 1) + 2*mol(m)%occ(imo)*phi(imo, 1)*phi(imo, 2)
+                  gg(ip, 2) = gg(ip, 2) + 2*mol(m)%occ(imo)*phi(imo, 1)*phi(imo, 3)
+                  gg(ip, 3) = gg(ip, 3) + 2*mol(m)%occ(imo)*phi(imo, 1)*phi(imo, 4)
+                  hess(ip, 1, 1) = hess(ip, 1, 1) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 5) + phi(imo, 2)**2)
+                  hess(ip, 2, 2) = hess(ip, 2, 2) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 6) + phi(imo, 3)**2)
+                  hess(ip, 3, 3) = hess(ip, 3, 3) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 7) + phi(imo, 4)**2)
+                  hess(ip, 1, 2) = hess(ip, 1, 2) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 8) + phi(imo, 2)*phi(imo, 3))
+                  hess(ip, 1, 3) = hess(ip, 1, 3) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 9) + phi(imo, 2)*phi(imo, 4))
+                  hess(ip, 2, 3) = hess(ip, 2, 3) + 2*mol(m)%occ(imo)*(phi(imo, 1)*phi(imo, 10) + phi(imo, 3)*phi(imo, 4))
+                  tp(ip) = tp(ip) + mol(m)%occ(imo)*(phi(imo, 2)*phi(imo, 2) + phi(imo, 3)*phi(imo, 3) + phi(imo, 4)*phi(imo, 4))
+               enddo
+            enddo ! i = 0, n-1
+
+            deallocate (chi, phi, maxc, ldopri)
+
+            ! accumulate intermediate variables
+            do ip = 1, n(1)
+               ! rho and grad
+               rhoaux(ip) = max(rhoaux(ip), 1d-30)
+               grad2 = gg(ip, 1)**2 + gg(ip, 2)**2 + gg(ip, 3)**2
+               ! hessian eigenvalue and sign of rho
+               hess(ip, 2, 1) = hess(ip, 1, 2)
+               hess(ip, 3, 1) = hess(ip, 1, 3)
+               hess(ip, 3, 2) = hess(ip, 2, 3)
+               call rs(3, 3, hess(ip, :, :), heigs, 0, hvecs, wk1, wk2, istat)
+
+               !$omp critical (writeshared)
+               rho(ip, jp, kp) = sign(rhoaux(ip), heigs(2))*100d0
+               grad(ip, jp, kp) = sqrt(grad2)/(const*rhoaux(ip)**fothirds)
+               cheig(ip, jp, kp) = heigs(2)
+               !$omp end critical (writeshared)
+            enddo
+         enddo ! k = 0, n(3)-1
+      enddo ! j = 0, n(2)-1
+      !$omp end parallel do
+
+      deallocate (dx, dy, dz, d2, hess, tp, gg)
+
+   end subroutine calcprops_id_wfn
+
    subroutine init_rhogrid(m, nm)
       use reader
       use tools_io

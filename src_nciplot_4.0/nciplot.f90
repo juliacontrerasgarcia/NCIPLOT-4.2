@@ -662,7 +662,7 @@ program nciplot
                dimgrad = sqrt(grad2)/(const*rho**(4.D0/3.D0))
                intra = inter .and. ((any(rhom(1:nfrag) >= sum(rhom(1:nfrag))*rhoparam)) .or. &
                                     (sum(rhom(1:nfrag)) < rhoparam2*rho))
-               if (intra) dimgrad = -dimgrad
+               if (intra) dimgrad = -dimgrad !checks for interatomic, intra is true iff inter and condition hold
                !$omp critical (cubewrite)
                crho(i, j, k) = sign(rho, heigs(2))*100.D0
                cgrad(i, j, k) = dimgrad
@@ -718,28 +718,6 @@ program nciplot
             end do
          end do
       end do
-      ! Checking if interatomic
-      if (inter) then
-         !$omp parallel do private (x,rho,grad,hess,intra,rhom) schedule(dynamic)
-         do k = 0, nstep(3) - 1
-            do j = 0, nstep(2) - 1
-               do i = 0, nstep(1) - 1
-                  x = xinit + (/i, j, k/)*xinc
-                  call calcprops_pro(x, m, nfiles, rho, rho_n, rhom(1:nfrag), nfrag, autofrag, &
-                                     grad, hess, deltag)
-                  intra = ((any(rhom(1:nfrag) >= sum(rhom(1:nfrag))*rhoparam)) .or. &
-                           (sum(rhom(1:nfrag)) < rhoparam2*rho))
-                  !$omp critical (cubewrite)
-                  if (intra) cgrad(i, j, k) = -abs(cgrad(i, j, k))
-                  do i0 = 1, nfiles
-                     crho_n(i, j, k, i0) = rhom(i0)
-                  enddo
-                  !$omp end critical (cubewrite)
-               enddo
-            enddo
-         enddo
-         !$omp end parallel do
-      endif !interatomic run
       call system_clock(count=c2)
       write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
    endif !iswfn
