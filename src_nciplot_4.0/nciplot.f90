@@ -36,7 +36,7 @@ program nciplot
 
    character*(mline) :: argv(2), oname
    integer :: argc, nfiles, ifile, idx, istat, ntotal
-   integer :: i, j, k, nn0, nnf, lp, n1
+   integer :: i, j, k, nn0, nnf, lp, n1, molid
    character*(mline) :: filein, line, oline, word
    logical :: ok, ispromol
    real*8 :: rdum, deltag
@@ -667,8 +667,8 @@ program nciplot
                crho(i, j, k) = sign(rho, heigs(2))*100.D0
                cgrad(i, j, k) = dimgrad
                !crho_n variable
-               do i0 = 1, nfiles
-                  crho_n(i, j, k, i0) = rhom(i0)
+               do molid = 1, nfiles
+                  crho_n(i, j, k, molid) = rhom(molid)
                enddo
                !$omp end critical (cubewrite)
 
@@ -680,46 +680,94 @@ program nciplot
       write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
 
    else  ! wavefunction densities
-      call system_clock(count=c1)
-      call calcprops_wfn(xinit, xinc, nstep, m, nfiles, crho, cgrad, cheig)
-      !$omp parallel do private (x,rho,grad,hess,heigs,hvecs,wk1,wk2,istat,grad2,&
-      !$omp dimgrad,intra,rhom,flag,indx,i0,j0,k0) schedule(dynamic)
-      do k = 0, nstep(3) - 1
-         do j = 0, nstep(2) - 1
-            do i = 0, nstep(1) - 1
-               x = xinit + (/i, j, k/)*xinc
-               if (.not. firstgrid) then
-                  ! check if x is used, not removed
-                  flag = .false.
-                  do i0 = max(0, i - 1), i
-                     do j0 = max(0, j - 1), j
-                        do k0 = max(0, k - 1), k
-                           ! For each x, look for i, j, k indexes in the previous coarser grid
-                           indx = floor(((/i0, j0, k0/)*xinc)/xinc_coarse)
-                           indx = (/min(nstep_coarse(1) - 2, indx(1)), min(nstep_coarse(2) - 2, indx(2)), &
-                                    min(nstep_coarse(3) - 2, indx(3))/)
-                           if ((.not. flag) .and. (.not. (rmbox_coarse(indx(1), indx(2), indx(3))))) then
-                              flag = .true.
-                              goto 21
-                           end if
+      if (.not. inter) then
+         call system_clock(count=c1)
+         call calcprops_wfn(xinit, xinc, nstep, m, nfiles, crho, cgrad, cheig)
+         !$omp parallel do private (x,rho,grad,hess,heigs,hvecs,wk1,wk2,istat,grad2,&
+         !$omp dimgrad,intra,rhom,flag,indx,i0,j0,k0) schedule(dynamic)
+         do k = 0, nstep(3) - 1
+            do j = 0, nstep(2) - 1
+               do i = 0, nstep(1) - 1
+                  x = xinit + (/i, j, k/)*xinc
+                  if (.not. firstgrid) then
+                     ! check if x is used, not removed
+                     flag = .false.
+                     do i0 = max(0, i - 1), i
+                        do j0 = max(0, j - 1), j
+                           do k0 = max(0, k - 1), k
+                              ! For each x, look for i, j, k indexes in the previous coarser grid
+                              indx = floor(((/i0, j0, k0/)*xinc)/xinc_coarse)
+                              indx = (/min(nstep_coarse(1) - 2, indx(1)), min(nstep_coarse(2) - 2, indx(2)), &
+                                       min(nstep_coarse(3) - 2, indx(3))/)
+                              if ((.not. flag) .and. (.not. (rmbox_coarse(indx(1), indx(2), indx(3))))) then
+                                 flag = .true.
+                                 goto 21
+                              end if
+                           end do
                         end do
                      end do
-                  end do
 
-                  if (.not. flag) then
-                     crho(i, j, k) = 100d0
-                     cgrad(i, j, k) = 100d0
-                     cheig(i, j, k) = 0d0
-                     cycle
+                     if (.not. flag) then
+                        crho(i, j, k) = 100d0
+                        cgrad(i, j, k) = 100d0
+                        cheig(i, j, k) = 0d0
+                        cycle
+                     end if
+21                   continue
+
                   end if
-21                continue
-
-               end if
+               end do
             end do
          end do
-      end do
-      call system_clock(count=c2)
-      write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
+         call system_clock(count=c2)
+         write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
+      else !very experimental wfn intermolecular
+         call system_clock(count=c1)
+         do molid = 1, nfiles
+            call calcprops_id_wfn(xinit, xinc, nstep, m, nfiles, molid, crho, cgrad, cheig)
+            crho_n(:, :, :, molid) = crho(:, :, :)
+         end do
+         call calcprops_wfn(xinit, xinc, nstep, m, nfiles, crho, cgrad, cheig)
+         do k = 0, nstep(3) - 1
+            do j = 0, nstep(2) - 1
+               do i = 0, nstep(1) - 1
+                  x = xinit + (/i, j, k/)*xinc
+                  if (.not. firstgrid) then
+                     ! check if x is used, not removed
+                     flag = .false.
+                     do i0 = max(0, i - 1), i
+                        do j0 = max(0, j - 1), j
+                           do k0 = max(0, k - 1), k
+                              ! For each x, look for i, j, k indexes in the previous coarser grid
+                              indx = floor(((/i0, j0, k0/)*xinc)/xinc_coarse)
+                              indx = (/min(nstep_coarse(1) - 2, indx(1)), min(nstep_coarse(2) - 2, indx(2)), &
+                                       min(nstep_coarse(3) - 2, indx(3))/)
+                              if ((.not. flag) .and. (.not. (rmbox_coarse(indx(1), indx(2), indx(3))))) then
+                                 flag = .true.
+                                 goto 22
+                              end if
+                           end do
+                        end do
+                     end do
+                     intra = inter .and. (any(crho_n(i, j, k, 1:nfrag) >= abs(crho(i, j, k))*rhoparam))
+                     if (intra) then !checks for interatomic
+                        cgrad(i, j, k) = -cgrad(i, j, k)
+                     end if
+                     if (.not. flag) then
+                        crho(i, j, k) = 100d0
+                        cgrad(i, j, k) = 100d0
+                        cheig(i, j, k) = 0d0
+                        cycle
+                     end if
+22                   continue
+
+                  end if
+               end do
+            end do
+         end do
+         call system_clock(count=c2)
+         write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
+      endif !is inter !very experimental wfn intermolecular
    endif !iswfn
 
    if ((ind_g .le. ng) .or. (ng .eq. 1)) then
@@ -741,10 +789,6 @@ program nciplot
          deallocate (tmp_rmbox)
       end if
    end if
-
-! debugging
-   !write(*,*) nstep_coarse(1) - 2, nstep_coarse(2) - 2, nstep_coarse(3) - 2
-   !write(*,*) shape(rmbox_coarse)
 
 ! loop over multi-level grids
    ind_g = ind_g + 1
@@ -785,7 +829,7 @@ program nciplot
       do j = 0, nstep(2) - 1
          do i = 0, nstep(1) - 1
             ! fragments for the wfn case
-            intra = (cgrad(i, j, k) < 0)
+            intra = (cgrad(i, j, k) < 0d0)
             cgrad(i, j, k) = abs(cgrad(i, j, k))
             dimgrad = cgrad(i, j, k)
             rho = crho(i, j, k)/100d0
@@ -793,12 +837,15 @@ program nciplot
             if (ludat > 0 .and. .not. intra .and. (abs(rho) < rhocut) .and. (dimgrad < dimcut) .and. &
                 abs(rho) > 1d-30) then
                write (ludat, '(1p,E18.10,E18.10)') rho, dimgrad
-            end if ! rhocut/dimcut
+            endif ! rhocut/dimcut
 
-            ! write the cube files
-            if ((abs(rho) > rhoplot) .or. (dimgrad > dimcut) .or. intra) then
+            ! prepare the cube files
+            if ((abs(rho) > rhoplot) .or. (dimgrad > dimcut)) then
                cgrad(i, j, k) = 100d0
             endif !rho cutoff
+            if  (intra) then ! intermolecular points also to 100
+               cgrad(i, j, k) = 100d0
+            endif
          end do
       end do
    end do
@@ -830,8 +877,7 @@ program nciplot
                   grad2 = dot_product(grad, grad)
                   dimgrad = sqrt(grad2)/(const*rho**(4.D0/3.D0))
                   if (inter) then
-                     if ((any(rhom(1:nfrag) >= sum(rhom(1:nfrag))*rhoparam)) .or. &
-                         (sum(rhom(1:nfrag)) < rhoparam2*rho)) then
+                     if (any(crho_n(i, j, k, 1:nfrag) >= abs(crho(i, j, k))*rhoparam)) then
                         rmbox_coarse(i, j, k) = .true. !inactive
                      end if
                   end if
@@ -859,8 +905,7 @@ program nciplot
                   rho = abs(crho(i, j, k))/100d0
                   dimgrad = abs(cgrad(i, j, k))
                   if (inter) then
-                     if ((any(rhom(1:nfrag) >= sum(rhom(1:nfrag))*rhoparam)) .or. &
-                         (sum(rhom(1:nfrag)) < rhoparam2*rho)) then
+                     if (any(crho_n(i, j, k, 1:nfrag) >= crho(i, j, k)*rhoparam)) then
                         rmbox_coarse(i, j, k) = .true.
                      end if
                   end if

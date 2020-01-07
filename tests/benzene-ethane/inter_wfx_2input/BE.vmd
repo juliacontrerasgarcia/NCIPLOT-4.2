@@ -1,0 +1,40 @@
+#!/usr/local/bin/vmd
+# VMD script written by save_state $Revision: 1.10 $
+# VMD version: 1.8.6            
+set viewplist            
+set fixedlist            
+# Display settings            
+display projection   Orthographic            
+display nearclip set 0.000000            
+# load new molecule         
+mol new BE-dens.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+mol addfile BE-grad.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+#
+# representation of the atoms
+mol delrep 0 top
+mol representation Lines 1.00000
+mol color Name
+mol selection {all}
+mol material Opaque
+mol addrep top
+mol representation CPK 1.000000 0.300000 118.000000 131.000000
+mol color Name
+mol selection {index     0 to    17 }
+mol material Opaque
+mol addrep top
+#
+# add representation of the surface
+mol representation Isosurface  0.50000 1 0 0 1 1
+mol color Volume 0
+mol selection {all}
+mol material Opaque
+mol addrep top
+mol selupdate 2 top 0
+mol colupdate 2 top 0
+mol scaleminmax top 2 -5.0000 5.0000
+mol smoothrep top 2 0
+mol drawframes top 2 {now}
+color scale method BGR
+set colorcmds { {color Name {C} gray} }
+#some more
+

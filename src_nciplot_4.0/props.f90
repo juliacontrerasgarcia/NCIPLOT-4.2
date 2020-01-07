@@ -441,7 +441,7 @@ contains
                call rs(3, 3, hess(ip, :, :), heigs, 0, hvecs, wk1, wk2, istat)
 
                !$omp critical (writeshared)
-               rho(ip, jp, kp) = sign(rhoaux(ip), heigs(2))*100d0
+               rho(ip, jp, kp) = rhoaux(ip)
                grad(ip, jp, kp) = sqrt(grad2)/(const*rhoaux(ip)**fothirds)
                cheig(ip, jp, kp) = heigs(2)
                !$omp end critical (writeshared)

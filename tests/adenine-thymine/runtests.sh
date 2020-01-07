@@ -64,7 +64,6 @@ for dir in ./*intra_range/ ; do
    echo "                                      and by ranges :" ${int_ranges}
    cd ..
 done
-
 rm -rf */*.cube
 rm -rf */*.dat
 rm -rf */*.vmd
