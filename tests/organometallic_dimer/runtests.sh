@@ -1,5 +1,5 @@
 #!/bin/bash
-
+exit
 echo "********************"
 echo "Different rho cutoff:"
 echo "********************"

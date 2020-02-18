@@ -722,6 +722,7 @@ program nciplot
          call system_clock(count=c2)
          write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
       else !very experimental wfn intermolecular
+         write(*,*) 'It IS intermolecular, you dummy!'
          call system_clock(count=c1)
          do molid = 1, nfiles
             call calcprops_id_wfn(xinit, xinc, nstep, m, nfiles, molid, crho, cgrad, cheig)
@@ -749,7 +750,9 @@ program nciplot
                            end do
                         end do
                      end do
-                     intra = inter .and. (any(crho_n(i, j, k, 1:nfrag) >= abs(crho(i, j, k))*rhoparam))
+                     rho = max(crho(i,j,k), 1d-30)
+                     intra = inter .and. (any(crho_n(i, j, k, 1:nfrag)*100d0 >= abs(crho(i, j, k))*rhoparam) .or. &
+                                    (sum(crho_n(i, j, k, 1:nfrag)*100d0) < rhoparam2*rho))
                      if (intra) then !checks for interatomic
                         cgrad(i, j, k) = -cgrad(i, j, k)
                      end if
@@ -905,7 +908,7 @@ program nciplot
                   rho = abs(crho(i, j, k))/100d0
                   dimgrad = abs(cgrad(i, j, k))
                   if (inter) then
-                     if (any(crho_n(i, j, k, 1:nfrag) >= crho(i, j, k)*rhoparam)) then
+                     if (any(crho_n(i, j, k, 1:nfrag)*100d0 >= crho(i, j, k)*rhoparam)) then
                         rmbox_coarse(i, j, k) = .true.
                      end if
                   end if
