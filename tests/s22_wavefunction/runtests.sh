@@ -38,8 +38,12 @@ while read line ; do
 	   sed -i -- "s/PLACEHOLDER/A${gid}/g" *.gp 
            echo "Time for execution of "${gid}
 	   time ../../../src_nciplot_4.0/nciplot < ${gid}.nci > ${gid}.nco
-	   int=$(grep 'n=2.0' ${gid}.nco | head -n 1 | tail -n 1 |  tr -s " " | cut -d ' ' -f 4 ) #n=2.0 works best
+	   int=$(grep 'n=1.5' ${gid}.nco | head -n 1 | tail -n 1 |  tr -s " " | cut -d ' ' -f 4 ) #n=2.0 works best
            gnuplot plot_2d.gp
+           rm -rf *.cube
+           rm -rf *.dat
+           rm -rf *.vmd
+           rm -rf *.nco
 	   cd ..
 	   n=$(($n+1))
            intvals[$n]=${int}
@@ -57,6 +61,7 @@ echo "********************"
 echo "Removing S22 files!!"
 echo "********************"
 # Cleanup
+exit
 cat reference_test.txt |
 while read line ; do
    case $line in 

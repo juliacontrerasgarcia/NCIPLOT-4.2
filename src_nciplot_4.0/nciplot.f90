@@ -465,8 +465,8 @@ program nciplot
             do i = 1, nranges
                read (uin, *) srhorange(i, :)
                do j = 1, 2
-                  if (abs(srhorange(i, j)) .lt. 1d-15) then
-                     srhorange(i, j) = srhorange(i, j) + 1d-15
+                  if (abs(srhorange(i, j)) .lt. 1d-30) then
+                     srhorange(i, j) = srhorange(i, j) + 1d-30
                   endif
                enddo
             enddo
@@ -722,7 +722,6 @@ program nciplot
          call system_clock(count=c2)
          write (*, "(A, F6.2, A)") ' Time for computing density & RDG = ', real(dble(c2 - c1)/dble(cr), kind=8), ' secs'
       else !very experimental wfn intermolecular
-         write(*,*) 'It IS intermolecular, you dummy!'
          call system_clock(count=c1)
          do molid = 1, nfiles
             call calcprops_id_wfn(xinit, xinc, nstep, m, nfiles, molid, crho, cgrad, cheig)
@@ -750,9 +749,9 @@ program nciplot
                            end do
                         end do
                      end do
-                     rho = max(crho(i,j,k), 1d-30)
-                     intra = inter .and. (any(crho_n(i, j, k, 1:nfrag)*100d0 >= abs(crho(i, j, k))*rhoparam) .or. &
-                                    (sum(crho_n(i, j, k, 1:nfrag)*100d0) < rhoparam2*rho))
+                     rho = crho(i,j,k)
+                     intra = inter .and. (any(abs(crho_n(i, j, k, 1:nfrag))*100d0 >= abs(crho(i, j, k))*rhoparam) .or. &
+                                    (sum(abs(crho_n(i, j, k, 1:nfrag))*100d0) < rhoparam2*abs(rho)))
                      if (intra) then !checks for interatomic
                         cgrad(i, j, k) = -cgrad(i, j, k)
                      end if
@@ -908,7 +907,7 @@ program nciplot
                   rho = abs(crho(i, j, k))/100d0
                   dimgrad = abs(cgrad(i, j, k))
                   if (inter) then
-                     if (any(crho_n(i, j, k, 1:nfrag)*100d0 >= crho(i, j, k)*rhoparam)) then
+                     if (any(abs(crho_n(i, j, k, 1:nfrag))*100d0 >= abs(crho(i, j, k)*rhoparam))) then
                         rmbox_coarse(i, j, k) = .true.
                      end if
                   end if

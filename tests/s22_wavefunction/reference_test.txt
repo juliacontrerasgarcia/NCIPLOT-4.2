@@ -2,6 +2,7 @@ filename                                CCSD(T)/CBS_(kcal/mol)
 7_Benzene-Benzene.wfx                   -2.73
 8_Benzene-Benzene.wfx                   -2.74
 10_Benzene-Water.wfx                    -3.28
+14_Formic-Formic.wfx                    -18.61
 22_Water-Water.wfx                      -5.02
 
 

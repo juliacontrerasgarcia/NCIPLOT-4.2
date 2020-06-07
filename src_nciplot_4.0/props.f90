@@ -58,7 +58,6 @@ contains
 
       real*8, parameter :: cutoff_pri = 1d-10
       real*8, parameter :: fothirds = 4d0/3d0
-      real*8, parameter :: m53 = -5d0/3d0
 
       rho = 0d0
       grad = 0d0
@@ -82,6 +81,10 @@ contains
       rhoaux = 0d0
       tp = 0d0
       gg = 0d0
+      dx(:,:) = 0d0
+      dy(:,:) = 0d0
+      dz(:,:) = 0d0
+      d2(:,:) = 0d0
 
       ! run over y and z
       !$omp parallel do private (ip,jp,kp,hess,tp,gg,chi,phi,maxc,ldopri,dx,dy,dz,d2,&
@@ -233,7 +236,7 @@ contains
                hess(ip, 3, 1) = hess(ip, 1, 3)
                hess(ip, 3, 2) = hess(ip, 2, 3)
                call rs(3, 3, hess(ip, :, :), heigs, 0, hvecs, wk1, wk2, istat)
-
+               !if (istat /= 0) call error('calcprops', 'Error diagonalizing hessian.', faterr)
                !$omp critical (writeshared)
                rho(ip, jp, kp) = sign(rhoaux(ip), heigs(2))*100d0
                grad(ip, jp, kp) = sqrt(grad2)/(const*rhoaux(ip)**fothirds)
@@ -273,12 +276,12 @@ contains
 
       real*8, parameter :: cutoff_pri = 1d-10
       real*8, parameter :: fothirds = 4d0/3d0
-      real*8, parameter :: m53 = -5d0/3d0
 
       rho = 0d0
       grad = 0d0
       cheig = 0d0
       m = molid
+      nmcent = 0
       nmcent = max(nmcent, mol(m)%n)
 
       allocate (dx(n(1), nmcent), dy(n(1), nmcent), dz(n(1), nmcent), d2(n(1), nmcent), stat=istat)
@@ -294,6 +297,10 @@ contains
       rhoaux = 0d0
       tp = 0d0
       gg = 0d0
+      dx(:,:) = 0d0
+      dy(:,:) = 0d0
+      dz(:,:) = 0d0
+      d2(:,:) = 0d0
 
       ! run over y and z
       !$omp parallel do private (ip,jp,kp,hess,tp,gg,chi,phi,maxc,ldopri,dx,dy,dz,d2,&
@@ -439,7 +446,7 @@ contains
                hess(ip, 3, 1) = hess(ip, 1, 3)
                hess(ip, 3, 2) = hess(ip, 2, 3)
                call rs(3, 3, hess(ip, :, :), heigs, 0, hvecs, wk1, wk2, istat)
-
+               !if (istat /= 0) call error('calcprops', 'Error diagonalizing hessian.', faterr)
                !$omp critical (writeshared)
                rho(ip, jp, kp) = rhoaux(ip)
                grad(ip, jp, kp) = sqrt(grad2)/(const*rhoaux(ip)**fothirds)
@@ -507,10 +514,8 @@ contains
       real*8, intent(out) :: deltag
 
       integer :: i
-      real*8 :: hh(3, 3), gg(3), rr, rho53, grad2, ebose, df, rhomr(nfr), tp
+      real*8 :: hh(3, 3), gg(3), rr, grad2, rhomr(nfr), tp
       real*8 :: igmgg(3), gradigm(3), gradigm2
-
-      real*8, parameter :: fthird = -5d0/3d0
 
       rho = 0d0
       rhom = 0d0
