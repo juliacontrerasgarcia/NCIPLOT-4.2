@@ -1,6 +1,5 @@
 NCIPLOT is a program for revealing non covalent interactions based on the reduced density gradient. Please cite:
-  * NCIPLOT-1.0: J. Contreras-Garcia, E. Johnson, S. Keinan, R. Chaudret, J-P Piquemal, D. Beratan, W. Yang, “NCIPLOT: a program for plotting non-covalent interaction regions”, J. Chem. Theor. Comp. 7, 625 (2011)
-  * NCIPLOT-4.0: (in preparation)
+  * NCIPLOT-4.0: DOI: https://pubs.acs.org/doi/10.1021/acs.jctc.0c00063
   
 For more information and updates, visit our webpage:
   http://www.lct.jussieu.fr/pagesperso/contrera/index-nci.html
