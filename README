@@ -59,7 +59,9 @@ environment variable to the number of cores:
 export OMP_NUM_THREADS=4
 
 Several tests and examples are provided in the tests/
-directory. The PDF manual is shipped with the code.
+directory. The PDF manual is simply NCIPLOT_MANUAL.pdf 
+which is shipped with the code. Only the usage of the code
+suggested in the manual is recommended.
 
 As a brief outline, the accepted keywords in this version are:
    !===============================================================================!
@@ -72,8 +74,6 @@ As a brief outline, the accepted keywords in this version are:
    ! - ONAME
    ! - INCREMENTS
    ! - OUTPUT
-   ! - CUBE
-   ! - ATCUBE
    ! - FRAGMENT
    ! - CUTOFFS
    ! - CUTPLOT
