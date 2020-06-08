@@ -59,7 +59,7 @@ environment variable to the number of cores:
 export OMP_NUM_THREADS=4
 
 Several tests and examples are provided in the tests/
-directory. The PDF manual will be available in doc/ directory soon.
+directory. The PDF manual is shipped with the code.
 
 As a brief outline, the accepted keywords in this version are:
    !===============================================================================!
