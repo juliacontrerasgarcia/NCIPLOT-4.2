@@ -425,7 +425,7 @@ program nciplot
          allocate (fginc(4))
          fginc = (/8, 4, 2, 1/)
          if (.not. inter) then
-            rthres = 0.5d0     ! box limits around the molecule
+            rthres = 0.5d0/bohrtoa     ! box limits around the molecule
          end if
 
       case ("CUTOFFS")          ! density and RDG cutoffs
