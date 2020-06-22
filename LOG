@@ -3,8 +3,21 @@ Version 4.0
 ****
 Adaptive grid refinement included.
 Integration algorithms included.
-Integration by subdomains of sign(lambda2)*rho implemented.
+Integration by subdomains of sign(lambda2)*rho implemented with the RANGE keyword.
 Addition of the .wfx reader module by Dave Arias.
 
-
-
+Version 4.0.1
+22/06/2020
+****
+New manual!
+RHOCUT2 has been substituted by INTERCUT.
+INTEGRATE keyword is now required for integration.
+Default adaptive scheme CG2FG 4 8 4 2 1.
+Default parameters are now 0.1 angstrom increments. 
+Default box extension (rthres) is molecule size + 10.75 angstrom.
+New keywords introduced: COARSE, FINE and ULTRAFINE.
+COARSE sets increments to 0.15 and rthres to 0.5 angstrom. 
+FINE sets increments to 0.05 and CG2FG 4 12 8 4 1.
+ULTRAFINE sets increments to 0.025 and CG2FG 4 24 16 8 1. 
+INCREMENTS are input in angstroms as well.
+It is now possible to read more than one wavefunction file, albeit not recommended.
