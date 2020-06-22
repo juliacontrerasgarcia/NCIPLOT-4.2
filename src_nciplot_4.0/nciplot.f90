@@ -211,7 +211,7 @@ program nciplot
    autor = .true.     ! build the cube automatically
    ligand = .false.   ! ligand keyword
    inter = .false.    ! intermolecular keyword
-   rthres = 1.5d0     ! box limits around the molecule
+   rthres = 0.75d0/bohrtoa     ! box limits around the molecule
    dointeg = .false.  ! integrating properties or not
    dorange = .false.  ! do not integrate range
    firstgrid = .true. ! flag for the first adaptive grid run
