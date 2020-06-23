@@ -1,0 +1,13 @@
+2
+A7_Benzene-Benzene.wfn
+B7_Benzene-Benzene.wfn
+FINE
+OUTPUT 3
+INTEGRATE
+INTERMOLECULAR
+INTERCUT 0.80 0.75
+RANGE 3
+-0.1 -0.01
+-0.01 0.01
+0.01 0.1
+ONAME benzene-benzene

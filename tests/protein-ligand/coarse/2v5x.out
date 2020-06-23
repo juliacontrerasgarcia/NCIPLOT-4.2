@@ -1,0 +1,262 @@
+ # ----------------- NCIPLOT ------------------------
+ # --- PLOTTING NON COVALENT INTERACTION REGIONS ----
+ # ---             E.R. Johnson                  ----
+ # ---          J. Contreras-Garcia              ----
+ # ----------    Duke University         ------------
+ #                                                   
+ # ---             A. de la Roza                  ---
+ # --------- University of California Merced --------
+ #                                                   
+ # ---               R. A. Boto                   ---
+ # ---                 C. Quan                     --
+ # --------  Université Pierre et Marie Curie -------
+ # --------------------------------------------------
+ # ---              Please cite                  ----
+ # --J. Am. Chem. Soc., 2010, 132 (18), pp 6498–6506-
+ # --------------------------------------------------
+ # --------------------------------------------------
+ # ---     Contributions for the wfn properties  ----
+ # ---      from H. L. Schmider are acknowledged  ---
+ # --------------------------------------------------
+ # --------------------------------------------------
+ # ---     Contributions for the wfx reader      ----
+ # ---      from Dave Arias are acknowledged      ---
+ # --------------------------------------------------
+ #
+ # Start -- 2019.06.19, 20:54:59.880
+
+File: /home/ruben/Documents/software/nciplot/src_nciplot_4.0/dat/h__lda.wfc
+WARNING(readgrid): Atomic density file not found
+File: /home/ruben/Documents/software/nciplot/src_nciplot_4.0/dat/c__lda.wfc
+WARNING(readgrid): Atomic density file not found
+File: /home/ruben/Documents/software/nciplot/src_nciplot_4.0/dat/n__lda.wfc
+WARNING(readgrid): Atomic density file not found
+File: /home/ruben/Documents/software/nciplot/src_nciplot_4.0/dat/o__lda.wfc
+WARNING(readgrid): Atomic density file not found
+File: /home/ruben/Documents/software/nciplot/src_nciplot_4.0/dat/s__lda.wfc
+WARNING(readgrid): Atomic density file not found
+-----------------------------------------------------
+      INPUT INFORMATION:
+-----------------------------------------------------
+
+      MIND YOU
+      ONLY ANALYZING INTERMOLECULAR INTERACTIONS     
+
+      Using                          2v5x-ligand.xyz as LIGAND
+
+-----------------------------------------------------
+      Calculation details:
+-----------------------------------------------------
+RHO  THRESHOLD   (au): 0.20
+RDG  THRESHOLD   (au): 1.00
+DISCARDING RHO PARAM : 0.95
+RADIAL THRESHOLD  (A): 7.56
+
+-----------------------------------------------------
+      Writing output in the following units:
+-----------------------------------------------------
+
+ Sign(lambda2)xDensity x Reduced Density Gradient    = 2v5x.dat
+
+ Reduced Density Gradient,RDG      = 2v5x-grad.cube
+ Sign(lambda2)xDensity,LS          = 2v5x-dens.cube
+ VMD script                        = 2v5x.vmd
+
+
+
+-----------------------------------------------------
+      Operating grid and increments: Grid-1
+-----------------------------------------------------
+ x0,y0,z0  =    35.6516    -7.5268    88.9437
+ x1,y1,z1  =    66.6752    26.6924   120.5116
+ ix,iy,iz  =  1.51    1.51    1.51
+ nx,ny,nz  =   21      23      21
+
+ Time for computing density & RDG =   0.09 secs
+ 77.50% small boxes are removed
+
+
+-----------------------------------------------------
+      Operating grid and increments: Grid-2
+-----------------------------------------------------
+ x0,y0,z0  =    35.6516    -7.5268    88.9437
+ x1,y1,z1  =    66.6752    26.6924   120.5116
+ ix,iy,iz  =  0.76    0.76    0.76
+ nx,ny,nz  =   42      46      42
+
+ Time for computing density & RDG =   0.16 secs
+ 85.09% small boxes are removed
+
+
+-----------------------------------------------------
+      Operating grid and increments: Grid-3
+-----------------------------------------------------
+ x0,y0,z0  =    35.6516    -7.5268    88.9437
+ x1,y1,z1  =    66.6752    26.6924   120.5116
+ ix,iy,iz  =  0.38    0.38    0.38
+ nx,ny,nz  =   83      91      84
+
+ Time for computing density & RDG =   0.77 secs
+ 89.54% small boxes are removed
+
+
+-----------------------------------------------------
+      Operating grid and increments: Grid-4
+-----------------------------------------------------
+ x0,y0,z0  =    35.6516    -7.5268    88.9437
+ x1,y1,z1  =    66.6752    26.6924   120.5116
+ ix,iy,iz  =  0.19    0.19    0.19
+ nx,ny,nz  =  165     182     168
+
+ Time for computing density & RDG =   4.10 secs
+ 95.12% small boxes are removed
+                                                     
+----------------------------------------------------------------------
+                                                    
+                     INTEGRATION DATA                        
+                                                     
+----------------------------------------------------------------------
+ Integration  over the volumes of rho^n                               
+----------------------------------------------------------------------
+ n=1.0           :       17.61304133
+ n=1.5           :        2.32824224
+ n=2.0           :        0.35261440
+ n=2.5           :        0.06053521
+ n=3.0           :        0.01167692
+ n=4/3           :        4.50502609
+ n=5/3           :        1.22627555
+ Volume          :     1633.62352180
+ rho-sum_i rho_i :        0.00349769
+                  
+---------------------------------------------------------------------
+ Integration  over the volumes of sign(lambda2)(rho)^n             
+---------------------------------------------------------------------
+ n=1.0           :        0.99058863
+ n=1.5           :       -0.29415691
+ n=2.0           :       -0.09945292
+ n=2.5           :       -0.02575888
+ n=3.0           :       -0.00646910
+ n=4/3           :       -0.32412828
+ n=5/3           :       -0.21982474
+----------------------------------------------------------------------
+ Integration  over the areas of rho^n              
+----------------------------------------------------------------------
+ n=1.0           :       51.56980798
+ n=1.5           :        8.10697980
+ n=2.0           :        1.50303554
+ n=2.5           :        0.31721406
+ n=3.0           :        0.07448800
+ n=4/3           :       14.73313737
+ n=5/3           :        4.55858707
+ Area            :     4277.24325158
+ rho-sum_i rho_i :        0.01489142
+----------------------------------------------------------------------
+                   
+
+                                                                      
+----------------------------------------------------------------------
+                                                                      
+               RANGE INTEGRATION DATA                                 
+----------------------------------------------------------------------
+                                                                      
+#                     Warning!                           #
+#       Criterion for active box has changed.            #
+# A box is defined as active if ALL its vertices are     #
+# within the density and reduced density gradient range. #
+#                                                        # 
+#                                                        # 
+                                                         
+                                                         
+                                                         
+ 99.75% small boxes are removed after reference is applied in interval 1
+----------------------------------------------------------------------
+ Interval        :       -0.10000000       -0.02000000                     
+                               
+----------------------------------------------------------------------
+ Integration  over the volumes of rho^n                               
+----------------------------------------------------------------------
+ n=1.0           :        2.97614936
+ n=1.5           :        0.58755898
+ n=2.0           :        0.11949129
+ n=2.5           :        0.02506085
+ n=3.0           :        0.00542289
+ n=4/3           :        1.00690144
+ n=5/3           :        0.34509889
+ Volume          :       82.88980295
+ rho-sum_i rho_i :        0.00118474
+                  
+---------------------------------------------------------------------
+ Integration  over the volumes of sign(lambda2)(rho)^n             
+---------------------------------------------------------------------
+ n=1.0           :       -2.97614936
+ n=1.5           :       -0.58755898
+ n=2.0           :       -0.11949129
+ n=2.5           :       -0.02506085
+ n=3.0           :       -0.00542289
+ n=4/3           :       -1.00690144
+ n=5/3           :       -0.34509889
+---------------------------------------------------------------------
+                         
+
+ 96.02% small boxes are removed after reference is applied in interval 2
+----------------------------------------------------------------------
+ Interval        :       -0.02000000        0.02000000                     
+                               
+----------------------------------------------------------------------
+ Integration  over the volumes of rho^n                               
+----------------------------------------------------------------------
+ n=1.0           :        9.54144563
+ n=1.5           :        0.92196559
+ n=2.0           :        0.09421658
+ n=2.5           :        0.01003976
+ n=3.0           :        0.00110512
+ n=4/3           :        1.99804406
+ n=5/3           :        0.43002960
+ Volume          :     1331.47355541
+ rho-sum_i rho_i :        0.00093561
+                  
+---------------------------------------------------------------------
+ Integration  over the volumes of sign(lambda2)(rho)^n             
+---------------------------------------------------------------------
+ n=1.0           :        3.84971782
+ n=1.5           :        0.30513698
+ n=2.0           :        0.02695284
+ n=2.5           :        0.00252377
+ n=3.0           :        0.00024814
+ n=4/3           :        0.69667440
+ n=5/3           :        0.13536057
+---------------------------------------------------------------------
+                         
+
+ 99.92% small boxes are removed after reference is applied in interval 3
+----------------------------------------------------------------------
+ Interval        :        0.02000000        0.10000000                     
+                               
+----------------------------------------------------------------------
+ Integration  over the volumes of rho^n                               
+----------------------------------------------------------------------
+ n=1.0           :        0.86539038
+ n=1.5           :        0.15423895
+ n=2.0           :        0.02791921
+ n=2.5           :        0.00513768
+ n=3.0           :        0.00096204
+ n=4/3           :        0.27392995
+ n=5/3           :        0.08729434
+ Volume          :       28.42398844
+ rho-sum_i rho_i :        0.00027675
+                  
+---------------------------------------------------------------------
+ Integration  over the volumes of sign(lambda2)(rho)^n             
+---------------------------------------------------------------------
+ n=1.0           :        0.86539038
+ n=1.5           :        0.15423895
+ n=2.0           :        0.02791921
+ n=2.5           :        0.00513768
+ n=3.0           :        0.00096204
+ n=4/3           :        0.27392995
+ n=5/3           :        0.08729434
+---------------------------------------------------------------------
+                         
+
+End -- 2019.06.19, 20:55:19.420
+

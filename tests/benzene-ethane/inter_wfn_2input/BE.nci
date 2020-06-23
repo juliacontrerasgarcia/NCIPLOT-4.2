@@ -1,0 +1,10 @@
+2
+benzene.wfn
+ethene.wfn
+FINE
+INTERMOLECULAR
+RANGE 3
+-0.1 -0.01
+-0.01 0.01
+0.01 0.1
+ONAME BE

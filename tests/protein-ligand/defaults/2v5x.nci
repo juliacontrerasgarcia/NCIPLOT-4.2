@@ -1,0 +1,10 @@
+2
+2v5x-within5.xyz
+2v5x-ligand.xyz
+LIGAND 2 4.
+ONAME 2v5x
+RANGE 3
+-0.1 -0.02
+-0.02 0.02
+0.02 0.1
+

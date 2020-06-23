@@ -1,0 +1,8 @@
+2
+A10_Benzene-Water.wfx
+B10_Benzene-Water.wfx
+FINE
+OUTPUT 3
+INTEGRATE
+INTERMOLECULAR
+INTERCUT 0.80 0.75
