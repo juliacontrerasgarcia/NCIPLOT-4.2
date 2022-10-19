@@ -1,0 +1,4 @@
+--BUGS--
+* Bug for stability of grids detected. Small variations on the integrals when small grids are used 
+* When concatenated integral ranges are used, integrals are not additive
+
